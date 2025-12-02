@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/evakaiing/go_grpc_microservices/pkg/api/biz";
+package biz;
+
+
+message Nothing {
+    bool dummy = 1;
+}
+
+
+service Biz {
+    rpc Check(Nothing) returns(Nothing) {}
+    rpc Add(Nothing) returns(Nothing) {}
+    rpc Test(Nothing) returns(Nothing) {}
+}

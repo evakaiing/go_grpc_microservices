@@ -1,7 +1,7 @@
 package service
 
 import (
-	pbAdmin "hw7/services/admin/pb"
+	pbAdmin "github.com/evakaiing/go_grpc_microservices/pkg/api/admin"
 	"sync"
 	"time"
 

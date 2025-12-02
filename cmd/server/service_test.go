@@ -18,8 +18,10 @@ import (
 	"google.golang.org/grpc/metadata"
 	status "google.golang.org/grpc/status"
 
-	    adminPb "hw7/services/admin/pb"
-    bizPb "hw7/services/biz/pb"
+	"github.com/evakaiing/go_grpc_microservices/internal/app" 
+
+	adminPb "github.com/evakaiing/go_grpc_microservices/pkg/api/admin"
+    bizPb "github.com/evakaiing/go_grpc_microservices/pkg/api/biz"
 )
 
 const (
@@ -35,7 +37,6 @@ const (
 }`
 )
 
-// Чтобы не было сюрпризов когда где-то не успела переключиться горутина и не успело что-то стартовать
 func wait(amount int) {
 	time.Sleep(time.Duration(amount) * 10 * time.Millisecond)
 }
@@ -54,7 +55,6 @@ func getGrpcConn(t *testing.T) *grpc.ClientConn {
 
 // Получаем контекст с нужными метаданными для ACL
 func getConsumerCtx(consumerName string) context.Context {
-	// ctx, _ := context.WithTimeout(context.Background(), time.Second)
 	ctx := context.Background()
 	md := metadata.Pairs(
 		"consumer", consumerName,
@@ -65,17 +65,16 @@ func getConsumerCtx(consumerName string) context.Context {
 // Старт-стоп сервера
 func TestServerStartStop(t *testing.T) {
 	ctx, finish := context.WithCancel(context.Background())
-	err := StartMyMicroservice(ctx, listenAddr, ACLData)
+	err := app.StartMyMicroservice(ctx, listenAddr, ACLData)
 	if err != nil {
 		t.Fatalf("cant start server initial: %v", err)
 	}
 	wait(1)
-	finish() // При вызове этой функции ваш сервер должен остановиться и освободить порт
+	finish() 
 	wait(1)
 
-	// Теперь проверим, что вы освободили порт и мы можем стартовать сервер ещё раз
 	ctx, finish = context.WithCancel(context.Background())
-	err = StartMyMicroservice(ctx, listenAddr, ACLData)
+	err = app.StartMyMicroservice(ctx, listenAddr, ACLData)
 	if err != nil {
 		t.Fatalf("cant start server again: %v", err)
 	}
@@ -84,9 +83,6 @@ func TestServerStartStop(t *testing.T) {
 	wait(1)
 }
 
-// У вас наверняка будет что-то выполняться в отдельных горутинах.
-// Этим тестом мы проверяем, что вы останавливаете все горутины, которые у вас были, и нет утечек.
-// Некоторый запас (goroutinesPerTwoIterations*5) остаётся на случай рантайм горутин
 func TestServerLeak(t *testing.T) {
 	// return
 	goroutinesStart := runtime.NumGoroutine()
@@ -107,8 +103,7 @@ func TestServerLeak(t *testing.T) {
 
 // ACL (права на методы доступа) парсится корректно
 func TestACLParseError(t *testing.T) {
-	// finish'а тут нет потому что стартовать у вас ничего не должно если не получилось распаковать ACL
-	err := StartMyMicroservice(context.Background(), listenAddr, "{.;")
+	err := app.StartMyMicroservice(context.Background(), listenAddr, "{.;")
 	if err == nil {
 		t.Fatalf("expacted error on bad acl json, have nil")
 	}
@@ -118,7 +113,7 @@ func TestACLParseError(t *testing.T) {
 func TestACL(t *testing.T) {
 	wait(1)
 	ctx, finish := context.WithCancel(context.Background())
-	err := StartMyMicroservice(ctx, listenAddr, ACLData)
+	err := app.StartMyMicroservice(ctx, listenAddr, ACLData)
 	if err != nil {
 		t.Fatalf("cant start server initial: %v", err)
 	}
@@ -176,7 +171,7 @@ func TestACL(t *testing.T) {
 
 func TestLogging(t *testing.T) {
 	ctx, finish := context.WithCancel(context.Background())
-	err := StartMyMicroservice(ctx, listenAddr, ACLData)
+	err := app.StartMyMicroservice(ctx, listenAddr, ACLData)
 	if err != nil {
 		t.Fatalf("cant start server initial: %v", err)
 	}
@@ -300,7 +295,7 @@ func TestLogging(t *testing.T) {
 }
 func TestStat(t *testing.T) {
 	ctx, finish := context.WithCancel(context.Background())
-	err := StartMyMicroservice(ctx, listenAddr, ACLData)
+	err := app.StartMyMicroservice(ctx, listenAddr, ACLData)
 	if err != nil {
 		t.Fatalf("cant start server initial: %v", err)
 	}
@@ -423,13 +418,13 @@ func TestStat(t *testing.T) {
 		Timestamp: 0,
 		ByMethod: map[string]uint64{
 			"/pbBiz.Biz/Check":          1,
-			"/pbBiz.Biz/Add":            2, // Стало 2 (было 1)
+			"/pbBiz.Biz/Add":            2, 
 			"/pbBiz.Biz/Test":           1,
 			"/pbAdmin.Admin/Statistics": 2,
 		},
 		ByConsumer: map[string]uint64{
 			"biz_user":  2,
-			"biz_admin": 2, // Стало 2 (было 1)
+			"biz_admin": 2, 
 			"stat":      2,
 		},
 	}
@@ -441,7 +436,7 @@ func TestStat(t *testing.T) {
 			"/pbBiz.Biz/Check":          1,
 			"/pbBiz.Biz/Add":            2,
 			"/pbBiz.Biz/Test":           1,
-			"/pbAdmin.Admin/Statistics": 2, // Тут тоже должны быть эти вызовы
+			"/pbAdmin.Admin/Statistics": 2, 
 		},
 		ByConsumer: map[string]uint64{
 			"biz_user":  2,

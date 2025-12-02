@@ -1,4 +1,4 @@
-module hw7
+module github.com/evakaiing/go_grpc_microservices
 
 go 1.25.0
 

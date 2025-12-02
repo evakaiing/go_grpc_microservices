@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	pbBiz "hw7/services/biz/pb"
+	pbBiz "github.com/evakaiing/go_grpc_microservices/pkg/api/biz"
 )
 
 type BizManager struct {
