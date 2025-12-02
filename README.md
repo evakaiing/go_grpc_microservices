@@ -18,8 +18,8 @@ gRPC-сервер с микросервисной архитектурой ин�
 
 1.  **Клон:**
     ```
-    git clone https://github.com/your-user/go-grpc-hw.git
-    cd go-grpc-hw/microservice
+    git clone https://github.com/evakaiing/go_grpc_microservices.git
+    cd go_grpc_microservices/microservice
     ```
 
 2.  **Тесты:**
@@ -70,3 +70,4 @@ gRPC-сервер с микросервисной архитектурой ин�
 ├── go.mod
 └── README.md
 ```
+
